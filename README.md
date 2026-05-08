@@ -28,63 +28,104 @@ Bâti par [Radiko](https://radiko.ca) — Mont-Saint-Hilaire, QC.
 
 ## Démarrage rapide pour un nouveau client
 
-### 1. Forker le template
+**Tout se fait dans le browser** — pas de terminal, pas de `git clone`, pas de `npm install`. Le fork garde le lien vers le template source, ce qui permet de récupérer les futures améliorations.
 
-On **fork** le template plutôt que de cloner-puis-init. Le fork garde un lien vers le repo source, ce qui permet de récupérer plus tard les améliorations du template (`gh repo sync`).
-
-**Via `gh` CLI (recommandé) :**
-
-```sh
-gh repo fork radiko-ca/carte-vsf-template \
-  --clone=true \
-  --fork-name=nom-du-client \
-  --org=radiko-ca
-cd nom-du-client
-```
-
-`--org=radiko-ca` crée le fork dans l'organisation Radiko. Retirer cette option pour forker sur ton compte perso.
-
-**Via interface GitHub :**
+### 1. Forker le template sur GitHub
 
 1. Aller sur https://github.com/radiko-ca/carte-vsf-template
-2. Cliquer **Fork** → choisir l'organisation `radiko-ca` → renommer en `nom-du-client`
-3. Cloner localement : `gh repo clone radiko-ca/nom-du-client && cd nom-du-client`
+2. Cliquer **Fork** (en haut à droite)
+3. **Owner** : `radiko-ca` · **Repository name** : `nom-du-client` (ex: `gabrieldupras-card`)
+4. **Decoche** "Copy the `main` branch only" si tu veux toutes les branches (sinon laisse coché)
+5. Cliquer **Create fork**
 
-### 2. Installer les deps
+Le fork est instantané. Tu te retrouves sur `https://github.com/radiko-ca/nom-du-client`.
 
-```sh
-npm install
-```
+### 2. Modifier `src/config.ts` directement dans GitHub
 
-### 3. Modifier `src/config.ts`
-
-C'est le **seul fichier à éditer** pour personnaliser la carte. Renseigne :
-
-- Identité : `fullName`, `firstName`, `lastName`, `title`, `organization`, `bio`
-- Contacts : `phone`, `email`, `website`, `address`
-- Liens sociaux : tableau `socials[]` avec `label`, `url`, `icon`
-- SEO : `metaTitle`, `metaDescription`, `canonicalUrl`
-- Branding : `theme` ('light' ou 'dark')
+1. Dans le repo forké, naviguer à `src/config.ts`
+2. Cliquer l'icône **crayon** (Edit this file) en haut à droite du fichier
+3. Modifier les champs :
+   - **Identité** : `fullName`, `firstName`, `lastName`, `title`, `organization`, `bio`
+   - **Contacts** : `phone`, `email`, `website`, `address` (rue, ville, région, code postal, pays)
+   - **Liens sociaux** : tableau `socials[]` avec `label`, `url`, `icon`
+   - **SEO** : `metaTitle`, `metaDescription`, `canonicalUrl`
+   - **Branding** : `theme` (`'light'` blanc/noir ou `'dark'` noir/blanc)
+4. **Commit changes** : message court (ex: "config: infos client") → **Commit directly to main**
 
 Icônes sociales supportées : `linkedin`, `instagram`, `facebook`, `twitter`, `github`, `youtube`, `tiktok`, `whatsapp`, `telegram`, `website`.
 
-### 4. Remplacer la photo
+### 3. Remplacer la photo dans GitHub
 
-Mettre la photo du client à `src/assets/photo.jpg` (formats acceptés : `.jpg`, `.jpeg`, `.png`, `.webp`). Idéal : carrée, ~800×800 px minimum, fond neutre, recadrage tête + épaules.
+1. Naviguer à `src/assets/photo.jpg` dans le repo forké
+2. Cliquer l'icône **poubelle** (Delete this file) → **Commit changes**
+3. Retour à `src/assets/` → bouton **Add file** → **Upload files**
+4. Glisser la nouvelle photo (`.jpg`, `.jpeg`, `.png`, ou `.webp`)
+5. **Renommer** le fichier en `photo.jpg` (ou autre extension supportée)
+6. **Commit changes**
 
-Le script `generate-vcf.mjs` redimensionne automatiquement la photo à 400×400 si elle dépasse 100 KB (limite recommandée pour `.vcf`).
+Photo idéale : carrée, ~800×800 px, fond neutre, cadrage tête + épaules.
+Le script de build redimensionne automatiquement à 400×400 si elle dépasse 100 KB.
 
-### 5. Remplacer `public/og-image.jpg`
+### 4. (Optionnel) Remplacer `public/og-image.jpg`
 
-Image 1200×630 utilisée pour les partages Facebook / LinkedIn / iMessage. Optionnel mais recommandé.
+Image 1200×630 utilisée pour les partages Facebook / LinkedIn / iMessage. Même processus que la photo.
 
-### 6. Tester en local
+### 5. Connecter Cloudflare Pages au repo forké
+
+1. Cloudflare Dashboard → **Workers & Pages** → **Create application** → onglet **Pages** → **Connect to Git**
+2. Autoriser GitHub si demandé → choisir l'organisation `radiko-ca`
+3. Sélectionner le repo forké (`radiko-ca/nom-du-client`) → **Begin setup**
+4. Remplir le formulaire de build :
+
+   | Champ | Valeur |
+   |---|---|
+   | **Project name** | `nom-du-client` (sera le sous-domaine `nom-du-client.pages.dev`) |
+   | **Production branch** | `main` |
+   | **Framework preset** | Astro |
+   | **Build command** | `npm run build` |
+   | **Build output directory** | `dist` |
+   | **Root directory** | (laisser vide) |
+
+5. Sous **Environment variables (advanced)**, ajouter :
+   - `NODE_VERSION` = `22`
+
+6. **Save and Deploy** — premier build ~1 minute. Une fois fini, le site est accessible à `https://nom-du-client.pages.dev`.
+
+Chaque commit futur sur `main` (via GitHub web UI ou autrement) **redéploie automatiquement**.
+
+### 6. Pointer le domaine du client
+
+Cloudflare Pages → projet créé → onglet **Custom domains** → **Set up a custom domain** → entrer `nomduclient.com`.
+
+- Si le domaine est déjà sur **Cloudflare DNS** : configuration automatique en 1-2 minutes
+- Si le domaine est ailleurs : Cloudflare donne un `CNAME` à pointer vers `nom-du-client.pages.dev`
+
+SSL Let's Encrypt provisionné automatiquement (~5 min).
+
+### 7. Récupérer les améliorations du template (plus tard)
+
+Quand le template Radiko est mis à jour, sync le fork via GitHub web :
+
+1. Aller sur le repo forké `radiko-ca/nom-du-client`
+2. Bouton **Sync fork** (en haut, sous le nom du repo)
+3. **Update branch**
+
+Si conflits (rare, normalement juste `src/config.ts`), GitHub guide la résolution en ligne.
+
+---
+
+## Workflow alternatif : dev local
+
+Pour tester en local avant de pousser, ou pour modifier plus de choses que `config.ts` + photo :
 
 ```sh
+gh repo clone radiko-ca/nom-du-client
+cd nom-du-client
+npm install
 npm run dev
 ```
 
-Ouvre `http://localhost:4321`. Vérifier :
+Ouvrir `http://localhost:4321`. Vérifier :
 
 - [ ] Photo, nom, titre, bio s'affichent correctement
 - [ ] Bouton "Ajouter à mes contacts" → télécharge `contact.vcf`
@@ -93,63 +134,9 @@ Ouvre `http://localhost:4321`. Vérifier :
 - [ ] QR code scannable → ouvre le `canonicalUrl`
 - [ ] Sur iPhone Safari : bouton "Ajouter" → modal d'instructions s'affiche
 
-### 7. Build de production
+Build de production : `npm run build` → `dist/` contient `index.html` (~15 KB) + `contact.vcf` + assets optimisés.
 
-```sh
-npm run build
-```
-
-Le `dist/` contient :
-- `index.html` (~15 KB)
-- `contact.vcf` (généré, ~50-100 KB selon taille photo)
-- Photo optimisée WebP, favicon, og-image
-- Tout est statique, déployable n'importe où
-
-### 8. Pousser le fork sur GitHub
-
-Une fois config + photo modifiés, commit + push sur le fork :
-
-```sh
-git add -A
-git commit -m "feat: configuration carte nom-du-client"
-git push origin main
-```
-
-### 9. Connecter Cloudflare Pages au repo forké
-
-1. Cloudflare Dashboard → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
-2. Autoriser GitHub si pas déjà fait, choisir l'organisation `radiko-ca`
-3. Sélectionner le repo forké (ex. `radiko-ca/nom-du-client`)
-4. Configurer le build :
-   - **Framework preset** : Astro
-   - **Build command** : `npm run build`
-   - **Build output directory** : `dist`
-   - **Root directory** : (vide)
-   - **Environment variables** :
-     - `NODE_VERSION` = `22`
-5. **Save and Deploy**
-
-Chaque `git push` sur la branche `main` déclenchera automatiquement un nouveau déploiement.
-
-### 10. Pointer le domaine du client
-
-Cloudflare Pages → projet créé → onglet **Custom domains** → **Set up a custom domain** → entrer `nomduclient.com`.
-
-- Si le domaine est déjà sur **Cloudflare DNS** : configuration automatique en 1-2 minutes
-- Si le domaine est ailleurs : Cloudflare donne un `CNAME` à pointer vers `nom-du-client.pages.dev`
-
-SSL Let's Encrypt est provisionné automatiquement (~5 min après ajout du domaine).
-
-### 11. Récupérer les améliorations du template (optionnel, plus tard)
-
-Quand le template Radiko est mis à jour, sync le fork pour récupérer les nouveautés sans perdre tes changements client :
-
-```sh
-gh repo sync radiko-ca/nom-du-client --source radiko-ca/carte-vsf-template
-git pull
-```
-
-Résoudre les conflits (généralement seulement dans `src/config.ts`), commit, push.
+Push : `git add -A && git commit -m "..." && git push`. Cloudflare Pages redéploie automatiquement.
 
 ## Architecture
 
