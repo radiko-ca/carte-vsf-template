@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json.schemastore.org/wrangler.json",
+  "name": "carte-vsf",
+  "compatibility_date": "2026-02-26",
+  "pages_build_output_dir": "./dist"
+}

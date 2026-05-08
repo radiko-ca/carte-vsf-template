@@ -1,0 +1,110 @@
+---
+import { card } from '../config';
+---
+
+<div class="actions">
+  <a
+    href="/contact.vcf"
+    id="vcard-btn"
+    class="btn btn--primary"
+    download={`${card.firstName}-${card.lastName}.vcf`}
+  >
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <line x1="19" y1="8" x2="19" y2="14"/>
+      <line x1="22" y1="11" x2="16" y2="11"/>
+    </svg>
+    {card.labels.addContact}
+  </a>
+
+  <button type="button" id="share-btn" class="btn btn--ghost">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+      <polyline points="16 6 12 2 8 6"/>
+      <line x1="12" y1="2" x2="12" y2="15"/>
+    </svg>
+    <span data-share-label>{card.labels.share}</span>
+  </button>
+</div>
+
+<style>
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 50px;
+    padding: 0 24px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background 200ms ease,
+      transform 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
+    border: 1px solid transparent;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn--primary {
+    background: var(--accent);
+    color: var(--accent-on);
+  }
+
+  .btn--primary:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn--primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+
+  .btn--ghost:hover {
+    background: var(--bg-elev);
+  }
+
+  .btn--ghost:active {
+    transform: scale(0.98);
+  }
+</style>

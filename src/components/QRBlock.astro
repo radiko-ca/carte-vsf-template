@@ -1,0 +1,54 @@
+---
+import QRCode from 'qrcode';
+import { card } from '../config';
+
+const qrSvg = await QRCode.toString(card.canonicalUrl, {
+  type: 'svg',
+  errorCorrectionLevel: 'M',
+  margin: 1,
+  width: 400,
+  color: {
+    dark: '#000000',
+    light: '#FFFFFF',
+  },
+});
+---
+
+<div class="qr">
+  <div class="qr-inner" set:html={qrSvg} />
+  <p class="qr-label">{card.labels.qrLabel}</p>
+</div>
+
+<style>
+  .qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .qr-inner {
+    width: 200px;
+    height: 200px;
+    padding: 10px;
+    background: var(--qr-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+
+  .qr-inner :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .qr-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin: 0;
+    text-align: center;
+  }
+</style>

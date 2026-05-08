@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+import { card } from '../config';
+import photo from '../assets/photo.jpg';
+---
+
+<header class="card-head">
+  <span class="card-label">{card.labels.cardLabel}</span>
+
+  <div class="card-photo-wrap">
+    <Image
+      src={photo}
+      alt={card.fullName}
+      class="card-photo"
+      width={320}
+      height={320}
+      format="webp"
+      quality={92}
+      loading="eager"
+    />
+  </div>
+
+  <h1 class="card-name">{card.fullName}</h1>
+  <p class="card-role">
+    {card.title}{card.organization ? ` · ${card.organization}` : ''}
+  </p>
+
+  {card.bio && <p class="card-bio">{card.bio}</p>}
+</header>
+
+<style>
+  .card-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .card-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  .card-photo-wrap {
+    margin-bottom: 12px;
+  }
+
+  .card-photo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    animation: card-photo-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  @keyframes card-photo-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .card-name {
+    font-family: var(--font-sans);
+    font-size: clamp(2rem, 1.5rem + 2.5vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .card-role {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .card-bio {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    max-width: 42ch;
+    margin: 8px auto 0;
+  }
+</style>

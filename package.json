@@ -1,0 +1,26 @@
+{
+  "name": "carte-vsf-template",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Template Astro statique pour cartes d'affaires virtuelles. Style noir/blanc Apple, vCard téléchargeable, QR code, modal iOS.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "prebuild": "tsx scripts/generate-vcf.mjs",
+    "build": "astro build",
+    "dev": "tsx scripts/generate-vcf.mjs && astro dev",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.5",
+    "astro": "^6.3.1",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@types/qrcode": "^1.5.5"
+  }
+}

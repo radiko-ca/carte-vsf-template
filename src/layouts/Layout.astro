@@ -1,0 +1,81 @@
+---
+import { card } from '../config';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = card.metaTitle,
+  description = card.metaDescription,
+} = Astro.props;
+
+const ogImageUrl = new URL('/og-image.jpg', card.canonicalUrl).toString();
+
+const schemaPerson: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: card.fullName,
+  givenName: card.firstName,
+  familyName: card.lastName,
+  jobTitle: card.title,
+  url: card.canonicalUrl,
+  email: card.email,
+  image: ogImageUrl,
+  sameAs: card.socials.map((s) => s.url),
+};
+
+if (card.organization) {
+  schemaPerson.worksFor = { '@type': 'Organization', name: card.organization };
+}
+if (card.phone) {
+  schemaPerson.telephone = card.phone;
+}
+if (card.address) {
+  schemaPerson.address = {
+    '@type': 'PostalAddress',
+    ...(card.address.street && { streetAddress: card.address.street }),
+    ...(card.address.city && { addressLocality: card.address.city }),
+    ...(card.address.region && { addressRegion: card.address.region }),
+    ...(card.address.postalCode && { postalCode: card.address.postalCode }),
+    ...(card.address.country && { addressCountry: card.address.country }),
+  };
+}
+---
+
+<!doctype html>
+<html lang="fr" data-theme={card.theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={card.canonicalUrl} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta name="theme-color" content={card.theme === 'dark' ? '#000000' : '#ffffff'} />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={card.canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content="fr_CA" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(schemaPerson)} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

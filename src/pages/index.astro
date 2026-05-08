@@ -1,0 +1,127 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
+import ActionButtons from '../components/ActionButtons.astro';
+import ContactList from '../components/ContactList.astro';
+import QRBlock from '../components/QRBlock.astro';
+import IOSModal from '../components/IOSModal.astro';
+import { card } from '../config';
+---
+
+<Layout>
+  <main class="page">
+    <div class="container">
+      <Card />
+      <ActionButtons />
+      <ContactList />
+      <QRBlock />
+      {card.labels.footerNote && (
+        <p class="footer-note">{card.labels.footerNote}</p>
+      )}
+    </div>
+  </main>
+
+  <IOSModal />
+</Layout>
+
+<script define:vars={{ shareData: { title: card.labels.shareTitle, text: card.labels.shareText, url: card.canonicalUrl }, copiedLabel: card.labels.sharedCopied, originalLabel: card.labels.share }}>
+  // Modal d'instructions iOS pour vraiment enregistrer le contact via Quick Look
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  const vcardBtn = document.getElementById('vcard-btn');
+  const iosModal = document.getElementById('ios-modal');
+
+  function openModal() {
+    if (!iosModal) return;
+    iosModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    if (!iosModal) return;
+    iosModal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  if (isIOS && vcardBtn && iosModal) {
+    vcardBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    });
+
+    iosModal.querySelectorAll('[data-close]').forEach((el) => {
+      el.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !iosModal.hidden) closeModal();
+    });
+
+    document.getElementById('vcm-go')?.addEventListener('click', () => {
+      setTimeout(closeModal, 100);
+    });
+  }
+
+  // Web Share API + clipboard fallback
+  const shareBtn = document.getElementById('share-btn');
+  const shareLabel = shareBtn?.querySelector('[data-share-label]');
+  shareBtn?.addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // User cancelled, ignore
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      if (shareLabel) {
+        shareLabel.textContent = copiedLabel;
+        setTimeout(() => {
+          shareLabel.textContent = originalLabel;
+        }, 2000);
+      }
+    } catch {
+      window.prompt('Copie le lien :', shareData.url);
+    }
+  });
+</script>
+
+<style>
+  .page {
+    min-height: 100svh;
+    padding: 56px 20px 80px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .footer-note {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    text-align: center;
+    line-height: 1.5;
+    margin: 0 auto;
+    max-width: 38ch;
+  }
+
+  @media (max-width: 480px) {
+    .page {
+      padding: 40px 18px 60px;
+    }
+    .container {
+      gap: 28px;
+    }
+  }
+</style>
