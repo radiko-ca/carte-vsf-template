@@ -28,14 +28,27 @@ Bâti par [Radiko](https://radiko.ca) — Mont-Saint-Hilaire, QC.
 
 ## Démarrage rapide pour un nouveau client
 
-### 1. Cloner le template
+### 1. Forker le template
+
+On **fork** le template plutôt que de cloner-puis-init. Le fork garde un lien vers le repo source, ce qui permet de récupérer plus tard les améliorations du template (`gh repo sync`).
+
+**Via `gh` CLI (recommandé) :**
 
 ```sh
-git clone https://github.com/radiko/carte-vsf-template.git nom-du-client
+gh repo fork radiko-ca/carte-vsf-template \
+  --clone=true \
+  --fork-name=nom-du-client \
+  --org=radiko-ca
 cd nom-du-client
-rm -rf .git
-git init
 ```
+
+`--org=radiko-ca` crée le fork dans l'organisation Radiko. Retirer cette option pour forker sur ton compte perso.
+
+**Via interface GitHub :**
+
+1. Aller sur https://github.com/radiko-ca/carte-vsf-template
+2. Cliquer **Fork** → choisir l'organisation `radiko-ca` → renommer en `nom-du-client`
+3. Cloner localement : `gh repo clone radiko-ca/nom-du-client && cd nom-du-client`
 
 ### 2. Installer les deps
 
@@ -92,29 +105,51 @@ Le `dist/` contient :
 - Photo optimisée WebP, favicon, og-image
 - Tout est statique, déployable n'importe où
 
-### 8. Déployer sur Cloudflare Pages
+### 8. Pousser le fork sur GitHub
 
-**Option A — via dashboard Cloudflare :**
-
-1. Push le repo sur GitHub
-2. Cloudflare Pages → "Create a project" → connecter GitHub
-3. Build command : `npm run build`
-4. Build output directory : `dist`
-5. Node version : `22` (variable d'env `NODE_VERSION=22`)
-6. Deploy
-
-**Option B — via Wrangler CLI :**
+Une fois config + photo modifiés, commit + push sur le fork :
 
 ```sh
-npm run build
-npx wrangler pages deploy dist --project-name=nom-du-client
+git add -A
+git commit -m "feat: configuration carte nom-du-client"
+git push origin main
 ```
 
-### 9. Pointer le domaine
+### 9. Connecter Cloudflare Pages au repo forké
 
-Cloudflare Pages → projet → "Custom domains" → ajouter `nomduclient.com`.
+1. Cloudflare Dashboard → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+2. Autoriser GitHub si pas déjà fait, choisir l'organisation `radiko-ca`
+3. Sélectionner le repo forké (ex. `radiko-ca/nom-du-client`)
+4. Configurer le build :
+   - **Framework preset** : Astro
+   - **Build command** : `npm run build`
+   - **Build output directory** : `dist`
+   - **Root directory** : (vide)
+   - **Environment variables** :
+     - `NODE_VERSION` = `22`
+5. **Save and Deploy**
 
-Si le domaine est déjà sur Cloudflare DNS, c'est automatique. Sinon, créer un `CNAME` vers `nom-du-client.pages.dev`.
+Chaque `git push` sur la branche `main` déclenchera automatiquement un nouveau déploiement.
+
+### 10. Pointer le domaine du client
+
+Cloudflare Pages → projet créé → onglet **Custom domains** → **Set up a custom domain** → entrer `nomduclient.com`.
+
+- Si le domaine est déjà sur **Cloudflare DNS** : configuration automatique en 1-2 minutes
+- Si le domaine est ailleurs : Cloudflare donne un `CNAME` à pointer vers `nom-du-client.pages.dev`
+
+SSL Let's Encrypt est provisionné automatiquement (~5 min après ajout du domaine).
+
+### 11. Récupérer les améliorations du template (optionnel, plus tard)
+
+Quand le template Radiko est mis à jour, sync le fork pour récupérer les nouveautés sans perdre tes changements client :
+
+```sh
+gh repo sync radiko-ca/nom-du-client --source radiko-ca/carte-vsf-template
+git pull
+```
+
+Résoudre les conflits (généralement seulement dans `src/config.ts`), commit, push.
 
 ## Architecture
 
